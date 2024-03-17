@@ -15,4 +15,4 @@ config.py: Will contain constants and other configuration parameters( e.g. db co
 
 <u>Checking if the app is up and running</u>
 
-hit the endpoint /admin/health in the browser 
+hit the endpoint GET /admin/health in the browser url bar
