@@ -12,3 +12,7 @@ Here is the project structure:
 
 app.py: Contains the main initialization of the Flask app instance
 config.py: Will contain constants and other configuration parameters( e.g. db connection strings etc)
+
+<u>Checking if the app is up and running</u>
+
+hit the endpoint /admin/health in the browser 
