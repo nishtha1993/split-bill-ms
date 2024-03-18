@@ -11,4 +11,3 @@ def health_check():
     """Hello word method."""
     logger.info("[GET /admin/health].health_check : Just checking health!")
     return "I am healthy!"
-
