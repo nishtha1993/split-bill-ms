@@ -10,5 +10,5 @@ logger = logging.getLogger(__name__)
 def health_check():
     """Hello word method."""
     logger.info("[GET /admin/health].health_check : Just checking health!")
-    return "I am ready to Split-a-bill!!"
+    return "I am healthy!"
 
