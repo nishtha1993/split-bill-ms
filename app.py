@@ -7,6 +7,7 @@ from apis.admin import admin_bp
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Defining the app instance
 split_bill_app = Flask(__name__)
 
 #create mappings
