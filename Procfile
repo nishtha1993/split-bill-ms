@@ -1,1 +1,1 @@
-web: python --wsgi-file app.py
+web: python app.py
