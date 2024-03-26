@@ -20,4 +20,4 @@ def entry():
 
 # run the app.
 if __name__ == "__main__":
-    split_bill_app.run(debug=Tru, port=80)
+    split_bill_app.run(debug=True, port=80)
