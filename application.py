@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # Defining the app instance
 split_bill_app = Flask(__name__)
 
-#create mappings
+#create mappings here
 split_bill_app.register_blueprint(admin_bp, url_prefix='/admin')
 
 @split_bill_app.route('/', methods=['GET'])
