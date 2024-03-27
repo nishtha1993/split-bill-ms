@@ -13,11 +13,6 @@ split_bill_app = Flask(__name__)
 #create mappings here
 split_bill_app.register_blueprint(admin_bp, url_prefix='/admin')
 
-@split_bill_app.route('/', methods=['GET'])
-def entry():
-    logger.info('[GET / ].entry : Entered the main entry endpoint')
-    return 'Time to split!'
-
 # run the app.
 if __name__ == "__main__":
     split_bill_app.run(debug=True, port=8080)
