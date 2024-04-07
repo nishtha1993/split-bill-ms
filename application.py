@@ -1,7 +1,13 @@
 # this will contain the main code which wraps together all code/routes
 import logging
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
+import boto3
+
+
+dynamodb = boto3.resource('dynamodb', region_name = 'us-east-1')
+table = dynamodb.Table('Users')
+
 #from apis.admin import admin_bp
 
 # Configure logging
@@ -26,6 +32,17 @@ def health():
 @split_bill_app.route("/")
 def hello_world():
    return "Hello, World!"
+
+@split_bill_app.route("/getUserById")
+def get_items():
+   response = table.get_item(
+      Key={
+        'userId': '1'
+        }
+        )
+   name = response['name']
+   print(name)
+
 
 # run the app.
 if __name__ == "__main__":
