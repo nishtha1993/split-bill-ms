@@ -34,9 +34,7 @@ table = dynamodb.Table('Users')
 
 @split_bill_app.route("/health")
 def health():
-    logger.info("Hit /health and it works correctly!")
-    for k, v in os.environ.items():
-        logger.info(f"OS Environ key {k} has value {v}")
+    logger.info("Inside /health and it works correctly!")
     return "I am alive and healthy!"
 
 
@@ -47,11 +45,13 @@ def hello_world():
 
 @split_bill_app.route("/getUserById")
 def get_items():
+    logger.info("Inside /health and it works correctly!")
     response = table.get_item(
         Key={
             'userId': '1'
         }
     )
+    logger.info("Got the response from dynamo")
     return jsonify(response)
 
 
