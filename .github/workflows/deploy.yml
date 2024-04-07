@@ -1,4 +1,4 @@
-name: deploy-to-eb
+name: deploy-to-lightsail
 
 # Controls when the workflow will run
 on:
@@ -18,8 +18,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Create ZIP deployment package
-        run: zip -r deploy_package.zip ./
+      - name: Install Utilities
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq unzip
+      - name: Install AWS Client
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install || true
+          aws --version
+          curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "lightsailctl"
+          sudo mv "lightsailctl" "/usr/local/bin/lightsailctl"
+          sudo chmod +x /usr/local/bin/lightsailctl
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -28,16 +39,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"
 
-      - name: Upload package to S3 bucket
-        run: aws s3 cp deploy_package.zip s3://split-elastic-beanstalk-deploy-bucket/
-
-      - name: Create new ElasticBeanstalk Application Version
+      - name: Build Docker Image
+        run: docker build -t split-bill-ms .
+      - name: Push and Deploy
         run: |
-          aws elasticbeanstalk create-application-version \
-          --application-name split-bill-ms \
-          --source-bundle S3Bucket="split-elastic-beanstalk-deploy-bucket",S3Key="deploy_package.zip" \
-          --version-label "ver-${{ github.sha }}" \
-          --description "commit-sha-${{ github.sha }}"
-
-      - name: Deploy new ElasticBeanstalk Application Version
-        run: aws elasticbeanstalk update-environment --environment-name split-bill-ms-env --version-label "ver-${{ github.sha }}"
+          service_name=split-bill-ms
+          aws lightsail push-container-image \
+            --region us-east-1 \
+            --service-name ${service_name} \
+            --label ${service_name} \
+            --image ${service_name}
+          aws lightsail get-container-images --service-name ${service_name} | jq --raw-output ".containerImages[0].image" > image.txt
+          jq --arg image $(cat image.txt) '.containers.app.image = $image' container.template.json > container.json
+          aws lightsail create-container-service-deployment --service-name ${service_name} --cli-input-json file://$(pwd)/container.json
+      

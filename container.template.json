@@ -1,0 +1,14 @@
+{
+    "containers": {
+      "split-bill-ms-container": {
+        "image": "",
+        "ports": {
+          "8080": "HTTP"
+        }
+      }
+    },
+    "publicEndpoint": {
+      "containerName": "split-bill-ms-container",
+      "containerPort": 8080
+    }
+  }
