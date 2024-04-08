@@ -35,11 +35,10 @@ def retrieve_user_with_id(id, request_guid):
     '''
     return dict()
 
-#TODO
 def check_user_with_id_exists(id, request_guid):
     return retrieve_user_with_id(id, request_guid) != None
 
-#TODO
+#TODO (not high priority)
 def delete_user(id, request_guid):
     '''
     You have to do a lot of other things across other tables as well!

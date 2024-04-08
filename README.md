@@ -16,3 +16,9 @@ config.py: Will contain constants and other configuration parameters( e.g. db co
 <u>Checking if the app is up and running</u>
 
 hit the endpoint GET /admin/health in the browser url bar
+
+GENERAL CODE GUIDELINES:
+1. write the api call under /apis, the logic of which should be in a corresponding file under /services. e.g. /apis/user.py each api would call corresponding /services/user.py
+2. In the services code, modularize it completely where each small piece of functionality is written as a function and placed under /utils for reuse across the project
+3. Log everything everwhere, propogate the requestId which is generated in the first line of every api call all the way down.
+4. If at all your api needs input schema validation put it under /models ( see /models/user.py for example)

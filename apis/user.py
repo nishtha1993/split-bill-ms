@@ -16,7 +16,14 @@ Base Url : /user (see application.py)
 Apis to implement here:
 1. /signin: Ensure that the user is created appropriately in the users table if already not present 
 2. /delete/<email>: Ensure all of the user details are removed 
-3. /get_user/<email>: Given user id get the entry from dynamo
+3. /get_user/<email>: Given user id get the entry from dynamo (TODO. if the UI needs to check for a list of users this can be converted into a bulk api instead where we accept a list of user email ids instead)
+4. /get_user_with_username/<name>: Given user name get that entry (TODO. have not written it but should be similar to #3)
+- will help in the flow where we have to add a user to a group for the first time. Can be similar to the teams add username/email searchbar.
+5. /add_profile_picture: (TODO. not written here yet) This will basically add the image in a specific S3 location and then store the s3 path in the users table as a new field(TODO. not written down here)
+- In the UI this profile picture will be crucial because you might have to show the friends profile picture as well.
+6. /retrieve_profile_picture: (Given s3 link of the user, which you can get from #3 just display it as an image tag in the UI): But to retrieve this unsure if we have to encode the data in the backend before sending it to the UI
+
+(NOTE: For both #5 and #6 implement it as generic s3 put and get functions in aws.py so that it can be reused in other places)
 
 References for setting up auth in UI side:
 1. https://www.youtube.com/watch?v=tKLXdt34E7o
