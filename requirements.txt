@@ -6,3 +6,5 @@ MarkupSafe==2.1.5
 werkzeug==2.2.2
 flask-cors
 boto3
+uuid
+marshmallow
