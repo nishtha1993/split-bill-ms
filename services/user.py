@@ -12,7 +12,7 @@ NOTE:
     - once a function is implemented remove the #TODO from it.
 '''
 import logging
-from application import getDynamoSession
+from config import getDynamoSession
 
 user_table = getDynamoSession().Table('Users')
 
