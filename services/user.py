@@ -11,7 +11,7 @@ NOTE:
     - only if it is a specific db related code which cannot be reused anywhere else implement that logic here, else always put it in utils.
     - once a function is implemented remove the #TODO from it.
 '''
-import logging
+import logging, random 
 from config import getDynamoSession
 
 user_table = getDynamoSession().Table('Users')
@@ -21,13 +21,21 @@ logger = logging.getLogger(__name__)
 
 # Main functions which need to be implemented
 #TODO
-def save_user(data, request_guid):
+def save_user(user_data, request_guid):
     '''
     Save the data in the user table.
 
     Ensure that email is the primary key in the user table
     '''
-    return dict()
+    user_data['userId'] = str(random.randint(0, 1000))
+    
+    logger.info(f'save_user to db | RequestId: {request_guid} : saving user {user_data}')
+
+    response = user_table.put_item(
+    Item=user_data
+    )
+
+    return response
 
 
 #TODO

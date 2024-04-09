@@ -45,15 +45,16 @@ def user_signin():
 
     '''
     request_guid = create_random_request_guid()
-    request_data = json.loads(request.data)
+    request_object = request.json
     logger.info(
-        f'[POST /user/signin] | RequestId: {request_guid} : Entered the endpoint with request_data {request_data}. Now validating input request body'
+        f'[POST /user/signin] | RequestId: {request_guid} : Entered the endpoint with request_data {request_object}. Now validating input request body'
     )
 
     user_schema = UserSchema()
     try:
         # Validate request body against schema data types
-        request_data = dumps(user_schema.load(request_data))
+        request_data = user_schema.load(request_object)
+        
     except ValidationError as err:
         # Return a nice message if validation fails
         return jsonify(err.messages), 400
@@ -61,8 +62,11 @@ def user_signin():
         return "Failed to validate user schema", 400
 
     logger.info(f'[POST /user/signin] | RequestId: {request_guid} : now checking if user with email already exists')
+    
     retrieved_user = retrieve_user_with_id(request_data['email'], request_guid)
-    if retrieved_user == None:
+
+    logger.info(f'[POST /user/signin] | RequestId: {request_guid} : retrieved user {retrieved_user}')
+    if 'Item' not in retrieved_user:
         logger.warn(
             f'[POST /user/signin] | RequestId: {request_guid} : no such user already exists! so we are creating a new one!')
         logger.info(f'[POST /user/signin] | RequestId: {request_guid} : now saving user!')
