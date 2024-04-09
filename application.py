@@ -38,6 +38,13 @@ logger.info("Registered all the routes")
 CORS(split_bill_app)
 logging.getLogger('flask_cors').level = logging.INFO
 
+# Debug api
+
+@split_bill_app.route("/health")
+def health():
+    logger.info("[GET /health] Entered endpoint")
+    return "I am healthy and alive!"
+
 # run the app.
 if __name__ == "__main__":
     logger.info("Going to start the app")
