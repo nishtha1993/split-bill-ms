@@ -22,3 +22,8 @@ GENERAL CODE GUIDELINES:
 2. In the services code, modularize it completely where each small piece of functionality is written as a function and placed under /utils for reuse across the project
 3. Log everything everwhere, propogate the requestId which is generated in the first line of every api call all the way down.
 4. If at all your api needs input schema validation put it under /models ( see /models/user.py for example)
+
+EXAMPLE CODE FOR DYNAMO
+
+Check out example from previous commit here
+https://github.com/nishtha1993/split-bill-ms/blob/9029277c8ce6ca35b35676ff9031ff9c6202d594/application.py
