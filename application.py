@@ -31,6 +31,8 @@ split_bill_app.register_blueprint(graph_bp, url_prefix='/graph')
 split_bill_app.register_blueprint(group_bp, url_prefix='/group')
 split_bill_app.register_blueprint(ml_bp, url_prefix='/ml')
 split_bill_app.register_blueprint(search_bp, url_prefix='/search')
+split_bill_app.register_blueprint(user_bp, url_prefix='/user')
+
 
 logger.info("Registered all the routes")
 
