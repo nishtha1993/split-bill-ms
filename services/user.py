@@ -13,8 +13,7 @@ NOTE:
 '''
 import logging
 
-
-user_table = dynamodb.Table('Users')
+user_table = getDynamoSession().Table('Users')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

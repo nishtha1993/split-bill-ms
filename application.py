@@ -58,6 +58,9 @@ def health():
     logger.info("[GET /health] Entered endpoint")
     return "I am healthy and alive!"
 
+def getDynamoSession():
+    return dynamodb
+
 # run the app.
 if __name__ == "__main__":
     logger.info("Going to start the app")
