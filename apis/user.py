@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from ..utils.log import create_random_request_guid
-from ..models.user import *
-from ..services.user import *
+from utils.log import create_random_request_guid
+from models.user import *
+from services.user import *
 from json import dumps, loads
 import logging
 
