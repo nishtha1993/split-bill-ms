@@ -10,9 +10,31 @@ logger = logging.getLogger(__name__)
 Base Url : /friend (see application.py)
 
 Apis to implement here:
-1. /getMyFriends: Get the list of friends along with friend level stats
-2. /getFriendHistory: Get all transactions between 2 people across groups (owe, owed, shared)
-3. /settle: Record the settlement (but just show something funky in the UI) 
+1. /getMyFriends: Get the list of friends along with which groups they are a part of ( i.e. some thing simple to show )
+- for getting list of friends just refer to the members in all the groups that the user is part of 
+- response can just be like [
+    friend_1: [group1, group2..],
+    friend_2: [group1, group2..],
+]
+
+
+2. /getFriendHistory: 
+- Just build the following object below
+FriendStats:
+- for that friend, which groups are we a part of
+- Total differential
+- Differential wrt each group
+- shared history of transactions ( basically all the times one of us has settled with the other can be retrieved from the transactions table)
+- our shared history of differentials (can show something like owe, owed, settled) (which means we also have to show the date, so that its like a proper audit timeline)
+( we can perhaps drop the differentials since there might be many more differentials than transactions )
+
+3. /settle: Record the settlement (but just show something funky in the UI , e.g. google pay after transferring funds) 
+- check validity first of all (A should owe money to B) [UI should have already enforced this!]
+- check the current total differential ( how much does A owe to B)
+- make an entry into the transaction table to say ( A paid B)
+- make a corresponding entry into the differential table as well ( but dont add the expenseId since the absence of that field means that its a settlement! check notion "Objects" for more details)
+
 4. /nudge: Send an email to friend reminding him to pay the differential
+- this is basically implemented as invoking a lambda which can send an email via AWS SES
 '''
 

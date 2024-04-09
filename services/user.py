@@ -59,7 +59,7 @@ def delete_user(id, request_guid):
     0. Check the following: (see utils.differentials and implement those functions)
         a. Check the money he owes to everyone else. It should be 0 (use the differentials table)
         b. Check the money others owe to him. It should also be 0 (use the differentials table)
-        c. If either of the two checks fail then we should take user to the friends page in the UI and ask him to settle with friends and nudge all existing friends and them to pay up.
+        c. ( can be an email ) If either of the two checks fail then we should take user to the friends page in the UI and ask him to settle with friends and nudge all existing friends and them to pay up.
         d. Only when it is completely settled can this person even remove their account data!.
     1. Delete the row with the user id in the BudgetConstriants table (if it doesn't exist create it as per the notion doc)
     2. Delete all rows with the user id in the Interactions Table

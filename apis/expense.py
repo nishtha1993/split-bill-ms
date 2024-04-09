@@ -12,6 +12,9 @@ Base Url : /budget (see application.py)
 
 Apis to implement here:
 
+
+Older thoughts:
+
 1. /addExpense - POST 
    Request: Expense object
    Response: expenseId String
@@ -30,17 +33,38 @@ Apis to implement here:
  todo: check budget 
  g. Save modified expense to the expense table
  
+New thoughts:
 
+1. /addExpense:
+- Assuming that the UI provides the entire expense object as is:
+    * Note that the receipt could have already been uploaded before so the object with the receipt s3 url would already be present
+- Get the items after going through textract
+- get the logic for the split 
+- update the differential tables for each person saying A has paid X amount for B
+- update the transactions table but only with user id A and groupid + expense Id ( no need to add all members as userid2 since right now they are in debt and only A has actually made a transaction!)
+    * note that the transactionId needs to be saved in the expense table entry as well!
+- save it in the expenses table
+- update the interaction table 
+- check the budget and send email ( if we have the time to implement it)
+
+(categories are all custom anyway, we just need to add the icons for each category in the UI as assets directly)
 
 2. /deleteExpense 
-
+- obviously need to provide the expenseid to the backend
+- compute the reverse differentials and add it to the differentials table but set the 'isUndoingDifferential' flag to true
+- transactionId can be used to delete the corresponding transactionId
+ ( perhaps its better to keep track of the differentialIds as well in the same way and delete those from the differentials table)
+ ( question is , do we want to be transparent with the users? or do we just want to ensure correctness without being transparent!?)
+- remove the entry from the expenses table at the very end 
+- update the interactions table as well
 
 3. /modifyExpense
+- check the new expense object and compare with the original expense object and only change the fields
+- if the split needs to be recalculated then we would have to update the differentials and the transactions as well ( maybe this is why it makes sense to store the ids for the differentials and transactions as well for easier writing of the code)
 
-4. /parseReceipt
 
 
-5. /categorize -  
+
 
 
 
