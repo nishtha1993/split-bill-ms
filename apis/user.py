@@ -2,8 +2,10 @@ from flask import Blueprint, request, jsonify
 from utils.log import create_random_request_guid
 from models.user import *
 from services.user import *
+import json
 from json import dumps, loads
 import logging
+
 
 user_bp = Blueprint('user', __name__)
 
