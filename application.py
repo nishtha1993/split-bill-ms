@@ -1,4 +1,7 @@
 import logging
+import boto3
+import os
+
 from flask import Flask
 from flask_cors import CORS
 
@@ -13,6 +16,14 @@ from apis.group import group_bp
 from apis.ml import ml_bp
 from apis.search import search_bp
 from apis.user import user_bp
+
+
+session = boto3.Session(
+    aws_access_key_id=os.environ.get('secrets.AWS_ACCESS_KEY'),
+    aws_secret_access_key=os.environ.get('secrets.AWS_SECRET_ACCESS_KEY'))
+
+# load dynamo db session, use this object to access all the tables 
+dynamodb = session.resource('dynamodb', region_name = 'us-east-1')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

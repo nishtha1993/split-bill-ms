@@ -14,6 +14,8 @@ NOTE:
 import logging
 
 
+user_table = dynamodb.Table('Users')
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -29,11 +31,15 @@ def save_user(data, request_guid):
 
 
 #TODO
-def retrieve_user_with_id(id, request_guid):
+def retrieve_user_with_id(email, request_guid):
     '''
     Write a dynamo query to get the whole row from the user table given user id
     '''
-    return dict()
+    return user_table.get_item(
+      Key={
+        'userId': email
+        }
+    )
 
 def check_user_with_id_exists(id, request_guid):
     return retrieve_user_with_id(id, request_guid) != None

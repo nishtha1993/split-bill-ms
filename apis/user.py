@@ -59,7 +59,7 @@ def user_signin():
         return "Failed to validate user schema", 400
 
     logger.info(f'[POST /user/signin] | RequestId: {request_guid} : now checking if user with email already exists')
-    retrieved_user = retrieve_user_with_id(request_data.email, request_guid)
+    retrieved_user = retrieve_user_with_id(request_data['email'], request_guid)
     if retrieved_user == None:
         logger.warn(
             f'[POST /user/signin] | RequestId: {request_guid} : no such user already exists! so we are creating a new one!')
