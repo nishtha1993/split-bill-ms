@@ -43,7 +43,7 @@ def user_signin():
 
     '''
     request_guid = create_random_request_guid()
-    request_data = request.json
+    request_data = request.get_json()
     logger.info(
         f'[POST /user/signin] | RequestId: {request_guid} : Entered the endpoint with request_data {request_data}. Now validating input request body'
     )
