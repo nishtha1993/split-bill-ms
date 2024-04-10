@@ -8,5 +8,10 @@ session = boto3.Session(
 # load dynamo db session, use this object to access all the tables 
 dynamodb = session.resource('dynamodb', region_name = 'us-east-1')
 
+lambdaResource = session.client('lambda',  region_name = 'us-east-1')
+
 def getDynamoSession():
     return dynamodb
+
+def getLambdaResource():
+    return lambdaResource
