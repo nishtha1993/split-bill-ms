@@ -12,10 +12,10 @@ Base Url : /friend (see application.py)
 Apis to implement here:
 1. /getMyFriends: Get the list of friends along with which groups they are a part of ( i.e. some thing simple to show )
 - for getting list of friends just refer to the members in all the groups that the user is part of 
-- response can just be like [
+- response can just be like {
     friend_1: [group1, group2..],
     friend_2: [group1, group2..],
-]
+}
 
 
 2. /getFriendHistory: 
@@ -33,6 +33,7 @@ FriendStats:
 - check the current total differential ( how much does A owe to B)
 - make an entry into the transaction table to say ( A paid B)
 - make a corresponding entry into the differential table as well ( but dont add the expenseId since the absence of that field means that its a settlement! check notion "Objects" for more details)
+- send user B an email saying user A has settled with you!
 
 4. /nudge: Send an email to friend reminding him to pay the differential
 - this is basically implemented as invoking a lambda which can send an email via AWS SES

@@ -98,3 +98,4 @@ def get_user(email):
         f'[GET /user/get_user/{email}] | RequestId: {request_guid} : Successfully retrieved user with id {email} which was {response}'
     )
     return jsonify(response)
+

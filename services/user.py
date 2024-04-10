@@ -65,6 +65,7 @@ def delete_user(id, request_guid):
     2. Delete all rows with the user id in the Interactions Table
     3. In the groups table update rows where this user_id belongs in the "members" of that group and remove that user from there.
     4. Remove from the user table finally.
+    5. Send an final email saying user account deleted successfully too bad to see you go !
 
     NOTE: everywhere we are doing delete we need to follow the pattern:
     If already not there in the table : don't do anything

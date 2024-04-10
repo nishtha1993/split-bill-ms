@@ -50,7 +50,7 @@ New thoughts:
 (categories are all custom anyway, we just need to add the icons for each category in the UI as assets directly)
 
 2. /deleteExpense 
-- obviously need to provide the expenseid to the backend
+- obviously need to provide the expenseId to the backend
 - compute the reverse differentials and add it to the differentials table but set the 'isUndoingDifferential' flag to true
 - transactionId can be used to delete the corresponding transactionId
  ( perhaps its better to keep track of the differentialIds as well in the same way and delete those from the differentials table)
