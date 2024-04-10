@@ -1,5 +1,13 @@
-from flask import Blueprint
+from flask import Blueprint, request, jsonify
 import logging
+import boto3
+import json
+from marshmallow import ValidationError
+from config import getLambdaResource
+from models.friend import *
+from utils.log import create_random_request_guid
+
+ses_lambda_client = getLambdaResource()
 
 friend_bp = Blueprint('friend', __name__)
 
@@ -16,6 +24,7 @@ Apis to implement here:
     friend_1: [group1, group2..],
     friend_2: [group1, group2..],
 ]
+
 
 
 2. /getFriendHistory: 
@@ -38,3 +47,39 @@ FriendStats:
 - this is basically implemented as invoking a lambda which can send an email via AWS SES
 '''
 
+@friend_bp.route('/nudge', methods=['POST'])
+def nudge():
+    '''
+    Send an email to friend reminding him to pay the differential
+        - this is basically implemented as invoking a lambda which can send an email via AWS SES
+
+    '''
+    request_guid = create_random_request_guid()
+    request_object = request.json
+    logger.info(
+        f'[POST /friend/nudge] | RequestId: {request_guid} : Entered the endpoint with request_data {request_object}. Now validating input request body'
+    )
+        
+    try:
+        # Validate request data
+        email_params = SESEmailSchema().load(request.json)
+        
+        # Update the email body to include username
+        email_params['body'] = email_params['body'] + email_params['user'] 
+
+    except ValidationError as err:
+        return jsonify({'error': err.messages}), 400
+    
+    # Invoke the SES Lambda function
+    response = ses_lambda_client.invoke(
+        FunctionName='SESSendEmail',
+        InvocationType='Event',  # Use 'Event' for asynchronous invocation
+        Payload=json.dumps(email_params)
+    )
+    logger.info(
+        f'[POST /friend/nudge] | RequestId: {request_guid} : Response received from lambda invocation {response}'
+    )
+    # Process the response
+    return response['Payload'].read().decode('utf-8')
+    
+    #return jsonify(result)
