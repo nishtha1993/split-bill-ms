@@ -5,7 +5,10 @@ import json
 from marshmallow import ValidationError
 from config import getLambdaResource
 from models.friend import *
+from services.group import *
 from utils.log import create_random_guid
+from collections import defaultdict
+
 
 ses_lambda_client = getLambdaResource()
 
@@ -47,6 +50,37 @@ FriendStats:
 4. /nudge: Send an email to friend reminding him to pay the differential
 - this is basically implemented as invoking a lambda which can send an email via AWS SES
 '''
+@friend_bp.route('/getMyFriends', methods=['GET'])
+def getMyFriends():
+    '''
+    Get the list of friends along with which groups they are a part of ( i.e. some thing simple to show )
+        - for getting list of friends just refer to the members in all the groups that the user is part of 
+        - response can just be like {
+            friend_1: [group1, group2..],
+            friend_2: [group1, group2..],
+        }
+    '''
+    request_guid = create_random_guid()
+    myEmailId = request.args.get('emailId')
+    logger.info(
+         f'[GET /friend/getMyFriends] | RequestId: {request_guid} : Entered the endpoint for my email {myEmailId}.'
+    )
+
+    try:
+        groups = retrieve_groups_for_emailId(myEmailId, request_guid)
+        logger.info(
+         f'[GET /friend/getMyFriends] | RequestId: {request_guid} : Retrieved {len(groups)} groups for {myEmailId}'
+        )
+        friend_in_groups = defaultdict(list)
+        for group in groups:
+                for member in group['members']:
+                    if(member != myEmailId):
+                        friend_in_groups[member].append(group['groupId'])   
+
+    except ValidationError as err:
+        return jsonify({'error': err.messages}), 400
+
+    return friend_in_groups
 
 @friend_bp.route('/nudge', methods=['POST'])
 def nudge():

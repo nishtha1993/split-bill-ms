@@ -38,7 +38,7 @@ def retrieve_user_with_id(email, request_guid):
     logger.info(f'retrieve_user_with_id | RequestId: {request_guid} : getting user with {email}')
     return user_table.get_item(
         Key={
-            'userId': email
+            'emailId': email
         }
     )
 

@@ -63,7 +63,7 @@ def user_signin():
 
     logger.info(f'[POST /user/signin] | RequestId: {request_guid} : now checking if user with email already exists')
     
-    retrieved_user = retrieve_user_with_id(request_data['email'], request_guid)
+    retrieved_user = retrieve_user_with_id(request_data['emailId'], request_guid)
 
     logger.info(f'[POST /user/signin] | RequestId: {request_guid} : retrieved user {retrieved_user}')
     if 'Item' not in retrieved_user:

@@ -20,3 +20,16 @@ def retrieve_groups(get_groups_data, request_guid):
     groupIds = get_groups_data["groupIds"]
     logger.info(f"retrieve_groups | RequestId: {request_guid}: retrieving the following group ids {groupIds}")
     return None
+
+def retrieve_groups_for_emailId(emailId, request_guid):
+    logger.info(f"retrieve_groups_for_emailId | RequestId: {request_guid}: retrieving the group for {emailId}")
+    response = groups_table.scan(
+        FilterExpression='contains(members, :member)',
+        ExpressionAttributeValues={
+            ':member': emailId
+        }
+    )
+    return response['Items']
+
+
+
