@@ -5,7 +5,7 @@ import json
 from marshmallow import ValidationError
 from config import getLambdaResource
 from models.friend import *
-from utils.log import create_random_request_guid
+from utils.log import create_random_guid
 
 ses_lambda_client = getLambdaResource()
 
@@ -55,7 +55,7 @@ def nudge():
         - this is basically implemented as invoking a lambda which can send an email via AWS SES
 
     '''
-    request_guid = create_random_request_guid()
+    request_guid = create_random_guid()
     request_object = request.json
     logger.info(
         f'[POST /friend/nudge] | RequestId: {request_guid} : Entered the endpoint with request_data {request_object}. Now validating input request body'
