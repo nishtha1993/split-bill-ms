@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from utils.log import create_random_request_guid
+from utils.log import create_random_guid
 from models.user import *
 from services.user import *
 import json
@@ -44,7 +44,7 @@ def user_signin():
         if no then insert this into user table
 
     '''
-    request_guid = create_random_request_guid()
+    request_guid = create_random_guid()
     request_object = request.json
     logger.info(
         f'[POST /user/signin] | RequestId: {request_guid} : Entered the endpoint with request_data {request_object}. Now validating input request body'
@@ -79,7 +79,7 @@ def user_signin():
 
 @user_bp.route("/delete/<email>", methods=['DELETE'])
 def user_account_delete(email):
-    request_guid = create_random_request_guid()
+    request_guid = create_random_guid()
     logger.info(f'[DELETE /user/delete] | RequestId: {request_guid} : Attempting to delete user with email {email}')
     response = delete_user(email, request_guid)
     logger.info(f'[DELETE /user/delete] | RequestId: {request_guid} : Successfully deleted user with email {email}')
@@ -88,7 +88,7 @@ def user_account_delete(email):
 
 @user_bp.route('/get_user/<email>', methods=['GET'])
 def get_user(email):
-    request_guid = create_random_request_guid()
+    request_guid = create_random_guid()
     logger.info(
         f'[GET /user/get_user/{email}] | RequestId: {request_guid} : Attempting to get user with {email}'
     )

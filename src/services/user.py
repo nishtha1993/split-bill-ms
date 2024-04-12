@@ -11,7 +11,7 @@ NOTE:
     - only if it is a specific db related code which cannot be reused anywhere else implement that logic here, else always put it in utils.
     - once a function is implemented remove the #TODO from it.
 '''
-import logging, random 
+import logging, random
 from config import getDynamoSession
 
 user_table = getDynamoSession().Table('Users')
@@ -19,40 +19,35 @@ user_table = getDynamoSession().Table('Users')
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 # Main functions which need to be implemented
-#TODO
 def save_user(user_data, request_guid):
     '''
     Save the data in the user table.
 
     Ensure that email is the primary key in the user table
     '''
-    user_data['userId'] = str(random.randint(0, 1000))
-    
-    logger.info(f'save_user to db | RequestId: {request_guid} : saving user {user_data}')
-
-    response = user_table.put_item(
-    Item=user_data
-    )
-
-    return response
+    logger.info(f'save_user | RequestId: {request_guid} : saving user {user_data}')
+    return user_table.put_item(Item=user_data)
 
 
-#TODO
 def retrieve_user_with_id(email, request_guid):
     '''
     Write a dynamo query to get the whole row from the user table given user id
     '''
+    logger.info(f'retrieve_user_with_id | RequestId: {request_guid} : getting user with {email}')
     return user_table.get_item(
-      Key={
-        'userId': email
+        Key={
+            'userId': email
         }
     )
+
 
 def check_user_with_id_exists(id, request_guid):
     return retrieve_user_with_id(id, request_guid) != None
 
-#TODO (not high priority)
+
+# TODO (not high priority)
 def delete_user(id, request_guid):
     '''
     You have to do a lot of other things across other tables as well!
