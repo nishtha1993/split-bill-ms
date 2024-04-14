@@ -1,5 +1,11 @@
-from flask import Blueprint
+from flask import Blueprint, request, jsonify
+from utils.log import create_random_guid
+from config import *
+import json
+from json import dumps, loads
 import logging
+from marshmallow import ValidationError
+
 
 ml_bp = Blueprint('ml', __name__)
 
@@ -32,3 +38,37 @@ and we can use these categories in the graph section later on
 
 
 '''
+def extract_invoice_details(textract_response):
+    # For example, you can parse the response for specific key-value pairs or patterns
+    # and return them as a dictionary
+    logger.info(textract_response)
+    return {
+        'invoice_number': 'INV12345',
+        'total_amount': '$100.00',
+        'date': '2024-04-13'
+    }
+
+@ml_bp.route('/parseFromTextract', methods=['POST'])
+def parseFromTextract():
+    request_guid = create_random_guid()
+    logger.info(
+        f'[POST /ml/parseFromTextract] | RequestId: {request_guid}.'
+    )
+    
+    try:
+        file = request.files['file']
+        logger.info(
+        f'[POST /ml/parseFromTextract] | File: {file}.'
+        )
+        response = textract_client.detect_document_text(
+        Document={
+            'Bytes': file.read()
+        }
+    )
+        
+    except ValidationError as err:
+        # Return a nice message if validation fails
+        return jsonify(err.messages), 400
+    details = extract_invoice_details(response)
+    return details
+
