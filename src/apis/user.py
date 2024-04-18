@@ -72,9 +72,9 @@ def user_signin():
         logger.info(f'[POST /user/signin] | RequestId: {request_guid} : now saving user!')
         response = save_user(request_data, request_guid)
         logger.info(f'[POST /user/signin] | RequestId: {request_guid} : successfully saved user!')
-        return jsonify(response)
+        return "Signed up!", response["ResponseMetadata"]["HTTPStatusCode"]
     else:
-        return "User already present in table!", 200
+        return "Logged in!", 200
 
 
 @user_bp.route("/delete/<email>", methods=['DELETE'])
@@ -95,7 +95,8 @@ def get_user(email):
     # given user id get the details
     response = retrieve_user_with_id(email, request_guid)
     logger.info(
-        f'[GET /user/get_user/{email}] | RequestId: {request_guid} : Successfully retrieved user with id {email} which was {response}'
+        f'[GET /user/get_user/{email}] | RequestId: {request_guid} : Successfully retrieved user with id {email} which was {response}. Extracting the item key from that.'
     )
-    return jsonify(response)
+    user_response = response["Item"]
+    return jsonify(user_response)
 

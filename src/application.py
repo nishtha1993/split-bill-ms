@@ -4,7 +4,6 @@ from flask import Flask
 from flask_cors import CORS
 
 # this wraps together all code/routes
-from apis.admin import admin_bp
 from apis.s3 import s3_bp
 from apis.budget import budget_bp
 from apis.expense import expense_bp
@@ -24,7 +23,6 @@ logger = logging.getLogger(__name__)
 split_bill_app = Flask(__name__)
 
 # create mappings here
-split_bill_app.register_blueprint(admin_bp, url_prefix='/admin')
 split_bill_app.register_blueprint(s3_bp, url_prefix='/s3')
 split_bill_app.register_blueprint(budget_bp, url_prefix='/budget')
 split_bill_app.register_blueprint(expense_bp, url_prefix='/expense')
