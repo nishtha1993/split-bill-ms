@@ -1,7 +1,7 @@
 from flask import Blueprint
 import logging
 
-aws_bp = Blueprint('aws', __name__)
+s3_bp = Blueprint('s3', __name__)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

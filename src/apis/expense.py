@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 '''
-Base Url : /budget (see application.py)
+Base Url : /expense (see application.py)
 
 Apis to implement here:
 
