@@ -82,7 +82,7 @@ def getMyFriends(email):
     return jsonify(friend_in_groups)
 
 
-@friend_bp.route('/getMyFriends/<email>/<friendEmail>', methods=['GET'])
+@friend_bp.route('/getMyFriendHistory/<email>/<friendEmail>', methods=['GET'])
 def getFriendHistory(email, friendEmail):
     '''
     output
@@ -132,8 +132,8 @@ def getFriendHistory(email, friendEmail):
             f'[GET /friend/getFriendHistory] | RequestId: {request_guid} : Common groups are {common_groups}. Now getting activity per group')
         raw_activity = dict()
         for groupId in common_groups:
-            group_differential = get_differentials_wrt_friend_in_a_group(email, friendEmail, groupId, request_guid)  # this will be sorted anyways
-            raw_activity[group] = group_differential
+            group_differentials = get_differentials_wrt_friend_in_a_group(email, friendEmail, groupId, request_guid)
+            raw_activity[groupId] = group_differentials
 
         logger.info(
             f'[GET /friend/getFriendHistory] | RequestId: {request_guid} : Retrieved all the differential group stats, now need to aggregate and send response')

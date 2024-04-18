@@ -20,8 +20,8 @@ def get_differentials_wrt_friend_in_a_group(email, friendEmail, groupId, request
     logger.info(
         f'get_differentials_wrt_friend_in_a_group | RequestId: {request_guid} : checking all the differentials for {email}, {friendEmail} in group {groupId}'
     )
-    differentials1 = get_uni_directional_differential_in_a_group(email, friendEmail, groupId)
-    differentials2 = get_uni_directional_differential_in_a_group(friendEmail, email, groupId)
+    differentials1 = get_uni_directional_differential_in_a_group(email, friendEmail, groupId, request_guid)
+    differentials2 = get_uni_directional_differential_in_a_group(friendEmail, email, groupId, request_guid)
     all_differentials = differentials1 + differentials2
     all_differentials.sort(key=lambda x: x['timestamp'], reverse=True)
     logger.info(
@@ -31,14 +31,12 @@ def get_differentials_wrt_friend_in_a_group(email, friendEmail, groupId, request
 
 
 def get_uni_directional_differential_in_a_group(x, y, g, request_guid):
-    scan_filter = {
-        'FilterExpression': '#id1 = :x AND #id2 = :x AND #groupId = :g',
-        'ExpressionAttributeNames': {'#id1': 'id1', '#id2': 'id2', '#groupId': 'groupId'},
-        'ExpressionAttributeValues': {':x': {'S': x}, ':y': {'S': y}, ':z': {'S': g}}
-    }
-
     # Perform scan 1
-    response = differentials_table.scan(**scan_filter)
+    response = differentials_table.scan(
+        FilterExpression='id1 = :x AND id2 = :y AND groupId = :g',
+        # ExpressionAttributeNames={'#id1': 'id1', '#id2': 'id2', '#groupId': 'groupId'},
+        ExpressionAttributeValues={':x': x, ':y': y, ':g': g}
+    )
     logger.info(
         f'get_uni_directional_differential_in_a_group | RequestId: {request_guid} : {x} -> {y} in group {g}, Results are retrieved. Total is {len(response["Items"])}'
     )
@@ -90,7 +88,8 @@ def prepare_friend_history(email1, email2, raw_activity, request_guid):
             friend_history["activity"][groupId].append(info)
 
         # Finalize the group level stats
-        friend_history["stats"][groupId]["type"] = get_type_for_aggregate_differential(friend_history["stats"][groupId]["differential"])
+        friend_history["stats"][groupId]["type"] = get_type_for_aggregate_differential(
+            friend_history["stats"][groupId]["differential"])
         friend_history["stats"][groupId]["differential"] = abs(friend_history["stats"][groupId]["differential"])
 
     # Finalize the total stats across all groups
