@@ -5,6 +5,7 @@ import json
 from marshmallow import ValidationError
 from config import getLambdaResource
 from models.friend import *
+from services.friend import prepare_friend_history, get_differentials_wrt_friend_in_a_group
 from services.group import *
 from utils.log import create_random_guid
 from collections import defaultdict
@@ -33,7 +34,6 @@ FriendStats:
 - for that friend, which groups are we a part of
 - Total differential
 - Differential wrt each group
-- shared history of transactions ( basically all the times one of us has settled with the other can be retrieved from the transactions table)
 - our shared history of differentials (can show something like owe, owed, settled) (which means we also have to show the date, so that its like a proper audit timeline)
 ( we can perhaps drop the differentials since there might be many more differentials than transactions )
 
@@ -80,6 +80,70 @@ def getMyFriends(email):
         return jsonify({'error': e}), 500
 
     return jsonify(friend_in_groups)
+
+
+@friend_bp.route('/getMyFriends/<email>/<friendEmail>', methods=['GET'])
+def getFriendHistory(email, friendEmail):
+    '''
+    output
+
+    {
+        "stats": {
+            "groupId1": {
+                "differential":
+                "type": owe, owed, settled
+            },
+            "total": {
+                "differential":
+                "type": owe, owed, settled
+            }
+        }, # need to build this in the end
+        "groups": [group ids],
+        "activity": {
+            "groupId1": [{
+                differential:,
+                type: owe, owed, paid, received
+                timestamp:
+                expenseId:
+            }],
+
+            .
+            .
+        }
+    }
+
+    '''
+    request_guid = create_random_guid()
+    logger.info(
+        f'[GET /friend/getFriendHistory/{email}/{friendEmail}] | RequestId: {request_guid} : Entered the endpoint'
+    )
+
+    try:
+        groups = retrieve_groups_for_emailId(email, request_guid)
+        logger.info(
+            f'[GET /friend/getFriendHistory] | RequestId: {request_guid} : Retrieved {len(groups)} groups for {email}. Checking common groups with {friendEmail} now'
+        )
+        common_groups = []
+        for group in groups:
+            if friendEmail in group['members']:
+                common_groups.append(group['groupId'])
+
+        logger.info(
+            f'[GET /friend/getFriendHistory] | RequestId: {request_guid} : Common groups are {common_groups}. Now getting activity per group')
+        raw_activity = dict()
+        for groupId in common_groups:
+            group_differential = get_differentials_wrt_friend_in_a_group(email, friendEmail, groupId, request_guid)  # this will be sorted anyways
+            raw_activity[group] = group_differential
+
+        logger.info(
+            f'[GET /friend/getFriendHistory] | RequestId: {request_guid} : Retrieved all the differential group stats, now need to aggregate and send response')
+        friendHistory = prepare_friend_history(email, friendEmail, raw_activity, request_guid)
+    except ValidationError as err:
+        return jsonify({'error': err.messages}), 400
+    except Exception as e:
+        return jsonify({'error': e}), 500
+
+    return jsonify(friendHistory)
 
 
 @friend_bp.route('/nudge', methods=['POST'])
