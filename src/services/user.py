@@ -11,7 +11,7 @@ NOTE:
     - only if it is a specific db related code which cannot be reused anywhere else implement that logic here, else always put it in utils.
     - once a function is implemented remove the #TODO from it.
 '''
-import logging, random
+import logging
 from config import getDynamoSession
 
 user_table = getDynamoSession().Table('Users')

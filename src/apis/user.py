@@ -2,8 +2,6 @@ from flask import Blueprint, request, jsonify
 from utils.log import create_random_guid
 from models.user import *
 from services.user import *
-import json
-from json import dumps, loads
 import logging
 
 
@@ -72,19 +70,9 @@ def user_signin():
         logger.info(f'[POST /user/signin] | RequestId: {request_guid} : now saving user!')
         response = save_user(request_data, request_guid)
         logger.info(f'[POST /user/signin] | RequestId: {request_guid} : successfully saved user!')
-        return "Signed up!", response["ResponseMetadata"]["HTTPStatusCode"]
+        return jsonify({"msg": "signed up!"}), response["ResponseMetadata"]["HTTPStatusCode"]
     else:
-        return "Logged in!", 200
-
-
-@user_bp.route("/delete/<email>", methods=['DELETE'])
-def user_account_delete(email):
-    request_guid = create_random_guid()
-    logger.info(f'[DELETE /user/delete] | RequestId: {request_guid} : Attempting to delete user with email {email}')
-    response = delete_user(email, request_guid)
-    logger.info(f'[DELETE /user/delete] | RequestId: {request_guid} : Successfully deleted user with email {email}')
-    return jsonify(response)
-
+        return jsonify({"msg": "logged in!"}), 200
 
 @user_bp.route('/get_user/<email>', methods=['GET'])
 def get_user(email):
@@ -99,4 +87,15 @@ def get_user(email):
     )
     user_response = response["Item"]
     return jsonify(user_response)
+
+#TODO
+@user_bp.route("/delete/<email>", methods=['DELETE'])
+def user_account_delete(email):
+    request_guid = create_random_guid()
+    logger.info(f'[DELETE /user/delete] | RequestId: {request_guid} : Attempting to delete user with email {email}')
+    response = delete_user(email, request_guid)
+    logger.info(f'[DELETE /user/delete] | RequestId: {request_guid} : Successfully deleted user with email {email}')
+    return jsonify(response)
+
+
 

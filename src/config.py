@@ -6,11 +6,10 @@ session = boto3.Session(
     aws_secret_access_key=os.environ.get('secrets.AWS_SECRET_ACCESS_KEY')
 )
 
-# load dynamo db session, use this object to access all the tables 
+# use these clients to interact with the services across all apis
 dynamodb = session.resource('dynamodb', region_name='us-east-1')
-
 lambdaResource = session.client('lambda', region_name='us-east-1')
-
+s3_client = session.client('s3', region_name='us-east-1')
 textract_client = session.client('textract', region_name='us-east-1')
 
 
@@ -24,3 +23,6 @@ def getLambdaResource():
 
 def getTextractClient():
     return textract_client
+
+def getS3Client():
+    return s3_client
