@@ -11,10 +11,12 @@ NOTE:
     - only if it is a specific db related code which cannot be reused anywhere else implement that logic here, else always put it in utils.
     - once a function is implemented remove the #TODO from it.
 '''
+import json
 import logging
-from config import getDynamoSession
+from config import getDynamoSession, getLambdaResource
 
 user_table = getDynamoSession().Table('Users')
+ses_lambda_client = getLambdaResource()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,3 +69,14 @@ def delete_user(id, request_guid):
     else: delete()
     '''
     return dict()
+
+
+def verify_recipient_email(email, request_guid):
+    logger.info(f'verify_recipient_email | RequestId: {request_guid} : going to verify recipient email {email}')
+    response = ses_lambda_client.invoke(
+        FunctionName='SESVerifyEmail',
+        InvocationType='Event',  # Use 'Event' for asynchronous invocation
+        Payload=json.dumps({"recipient_email": email})
+    )
+    logger.info(f'verify_recipient_email | RequestId: {request_guid} : verified user {email}, response is {response}')
+    return response

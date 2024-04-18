@@ -69,7 +69,8 @@ def user_signin():
             f'[POST /user/signin] | RequestId: {request_guid} : no such user already exists! so we are creating a new one!')
         logger.info(f'[POST /user/signin] | RequestId: {request_guid} : now saving user!')
         response = save_user(request_data, request_guid)
-        logger.info(f'[POST /user/signin] | RequestId: {request_guid} : successfully saved user!')
+        logger.info(f'[POST /user/signin] | RequestId: {request_guid} : successfully saved user! Now sending verification email')
+        verify_recipient_email(request_data['emailId'], request_guid)
         return jsonify({"msg": "signed up!"}), response["ResponseMetadata"]["HTTPStatusCode"]
     else:
         return jsonify({"msg": "logged in!"}), 200
