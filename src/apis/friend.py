@@ -1,8 +1,5 @@
 from flask import Blueprint, request, jsonify
-import logging
-import boto3
 import json
-from marshmallow import ValidationError
 from config import getLambdaResource
 from models.friend import *
 from services.friend import prepare_friend_history, get_differentials_wrt_friend_in_a_group
@@ -162,7 +159,7 @@ def nudge():
     try:
         # Validate request data
         email_params = SESEmailSchema().load(request.json)
-
+        # NOTE: can be html as well
         # Update the email body to include username
         email_params['body'] = email_params['body'] + email_params['user']
 
@@ -179,6 +176,4 @@ def nudge():
         f'[POST /friend/nudge] | RequestId: {request_guid} : Response received from lambda invocation {response}'
     )
     # Process the response
-    return response['Payload'].read().decode('utf-8')
-
-    # return jsonify(result)
+    return jsonify({"msg": "nudge remainder sent"})
