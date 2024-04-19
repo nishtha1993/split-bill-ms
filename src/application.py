@@ -4,15 +4,14 @@ from flask import Flask
 from flask_cors import CORS
 
 # this wraps together all code/routes
-from apis.s3 import s3_bp
-from apis.budget import budget_bp
-from apis.expense import expense_bp
-from apis.friend import friend_bp
-from apis.graph import graph_bp
 from apis.group import group_bp
-from apis.ml import ml_bp
-from apis.search import search_bp
+from apis.s3 import s3_bp
+from apis.friend import friend_bp
 from apis.user import user_bp
+from apis.graph import graph_bp
+from apis.ml import ml_bp
+from apis.expense import expense_bp
+from apis.search import search_bp
 
 
 # Configure logging
@@ -23,15 +22,14 @@ logger = logging.getLogger(__name__)
 split_bill_app = Flask(__name__)
 
 # create mappings here
-split_bill_app.register_blueprint(s3_bp, url_prefix='/s3')
-split_bill_app.register_blueprint(budget_bp, url_prefix='/budget')
-split_bill_app.register_blueprint(expense_bp, url_prefix='/expense')
-split_bill_app.register_blueprint(friend_bp, url_prefix='/friend')
-split_bill_app.register_blueprint(graph_bp, url_prefix='/graph')
-split_bill_app.register_blueprint(group_bp, url_prefix='/group')
-split_bill_app.register_blueprint(ml_bp, url_prefix='/ml')
-split_bill_app.register_blueprint(search_bp, url_prefix='/search')
 split_bill_app.register_blueprint(user_bp, url_prefix='/user')
+split_bill_app.register_blueprint(friend_bp, url_prefix='/friend')
+split_bill_app.register_blueprint(s3_bp, url_prefix='/s3')
+split_bill_app.register_blueprint(group_bp, url_prefix='/group')
+# split_bill_app.register_blueprint(ml_bp, url_prefix='/ml')
+# split_bill_app.register_blueprint(expense_bp, url_prefix='/expense')
+# split_bill_app.register_blueprint(graph_bp, url_prefix='/graph')
+# split_bill_app.register_blueprint(search_bp, url_prefix='/search')
 
 
 logger.info("Registered all the routes")

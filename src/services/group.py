@@ -12,7 +12,8 @@ def save_group(group_data, request_guid):
     groupId = create_random_guid()
     group_data["groupId"] = groupId
     logger.info(f'save_group | RequestId: {request_guid} : saving user {group_data} with newly created groupId.')
-    return groups_table.put_item(Item=group_data)
+    response = groups_table.put_item(Item=group_data)
+    return response, groupId
 
 
 def retrieve_groups_for_emailId(emailId, request_guid):

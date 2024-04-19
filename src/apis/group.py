@@ -87,9 +87,9 @@ def create_group():
 
     logger.info(f'[POST /group/create_group] | RequestId: {request_guid}: Now adding the group')
 
-    response = save_group(request_data, request_guid)
+    response, groupId = save_group(request_data, request_guid)
     logger.info(f'[POST /group/create_group] | RequestId: {request_guid}: Succesfully added the group!')
-    return jsonify(response)
+    return jsonify({"groupId": groupId, "msg": "Group created successfully"})
 
 @group_bp.route('/getGroups', methods=['POST'])
 def get_groups():

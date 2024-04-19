@@ -2,7 +2,7 @@ from marshmallow import Schema, fields, ValidationError, validates
 
 
 class GroupSchema(Schema):
-    groupId = fields.Str(required=True)
+    groupId = fields.Str(required=False)
     name = fields.Str(required=True)
     members = fields.List(fields.Email(), required=True)
     imageS3Link = fields.Str(required=False)
