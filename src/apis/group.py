@@ -1,6 +1,8 @@
 from flask import Blueprint
 import logging
 
+from services.friend import send_email_using_ses_lambda
+
 group_bp = Blueprint('group', __name__)
 
 logging.basicConfig(level=logging.INFO)
@@ -85,11 +87,30 @@ def create_group():
     except Exception as err:
         return "Failed to validate group schema", 400
 
-    logger.info(f'[POST /group/create_group] | RequestId: {request_guid}: Now adding the group')
 
-    response, groupId = save_group(request_data, request_guid)
-    logger.info(f'[POST /group/create_group] | RequestId: {request_guid}: Succesfully added the group!')
-    return jsonify({"groupId": groupId, "msg": "Group created successfully"})
+    try:
+        logger.info(f'[POST /group/create_group] | RequestId: {request_guid}: Now adding the group')
+
+        response, groupId = save_group(request_data, request_guid)
+        logger.info(f'[POST /group/create_group] | RequestId: {request_guid}: Succesfully added the group!')
+
+        subject = f"[Split-A-Bill]: Welcome to the group {request_data['name']}!"
+        body = f"<b> You have just been added to the group {request_data['name']} just now! </b>"
+        sesEmail = {
+            "recipient_email": request_data["members"],
+            "subject": subject,
+            "body": body
+        }
+        logger.info(
+            f'[POST /group/create_group] | RequestId: {request_guid} : Going to send email to confirm settlement using email {sesEmail}'
+        )
+        emailResponse = send_email_using_ses_lambda(sesEmail)
+        logger.info(
+            f'[POST /group/create_group] | RequestId: {request_guid} : Sent group welcome email with response {emailResponse}'
+        )
+        return jsonify({"groupId": groupId, "msg": "Group created successfully & welcome email sent!"})
+    except Exception as err:
+        return "Failed to send confirmation email", 500
 
 @group_bp.route('/getGroups', methods=['POST'])
 def get_groups():
@@ -113,15 +134,28 @@ def get_groups():
     except Exception as err:
         return "Failed to validate group schema", 400
 
-    logger.info(f'[POST /group/get_groups] | RequestId: {request_guid}: retrieving all the groups')
+    logger.info(f'[POST /group/get_groups] | RequestId: {request_guid}: Retrieving all the groups')
 
     response = retrieve_groups(request_data, request_guid)
-    logger.info(f'[POST /group/get_groups] | RequestId: {request_guid}: Succesfully retrieved the groups!')
+    logger.info(f'[POST /group/get_groups] | RequestId: {request_guid}: Successfully retrieved the groups!')
     return jsonify(response)
 
-@group_bp.route('/getMyGroups', methods=['GET'])
-def get_my_groups():
-    pass
+@group_bp.route('/getMyGroups/<emailId>', methods=['GET'])
+def get_my_groups(emailId):
+    '''
+        To be called at a point after the image is saved in s3 and the link is ready, refer to the GroupSchema object.
+        No need to pass a groupId as the backend will assign it.
+    '''
+    request_guid = create_random_guid()
+    logger.info(
+        f'[POST /group/get_my_groups/{emailId}] | RequestId: {request_guid} : Entered the endpoint '
+    )
+
+    logger.info(f'[POST /group/get_my_groups] | RequestId: {request_guid}: Retrieving all the groups')
+
+    response = retrieve_groups_for_emailId(emailId, request_guid)
+    logger.info(f'[POST /group/get_my_groups] | RequestId: {request_guid}: Successfully retrieved the groups!')
+    return jsonify(response)
 
 @group_bp.route('/leaveGroup', methods=['POST'])
 def leave_group():

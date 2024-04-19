@@ -159,6 +159,8 @@ def nudge():
         # NOTE: can be html as well
         # Update the email body to include username
         email_params['body'] = email_params['body'] + email_params['user']
+        email_params['recipient_email'] = [email_params['recipient_email']]
+        return jsonify({"msg": "Recorded settlement & sent verification email"}), 200
 
     except ValidationError as err:
         return jsonify({'error': err.messages}), 400
@@ -210,7 +212,7 @@ def settle():
         subject = "[Split-A-Bill]: Someone has settled with you!"
         body = f"<b>User <i>{emailId}</i> has settled <i>SGD {amount}</i> with you just now :)</b>"
         sesEmail = {
-            "recipient_email": recipientEmailId,
+            "recipient_email": [recipientEmailId],
             "subject": subject,
             "body": body
         }

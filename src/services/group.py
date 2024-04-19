@@ -1,8 +1,10 @@
 import logging
-from config import getDynamoSession
+from config import *
+from utils.dynamo import parse_group_item
 from utils.log import create_random_guid
 
 groups_table = getDynamoSession().Table('Groups')
+dynamodb_client = getDynamoClient()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,11 +28,23 @@ def retrieve_groups_for_emailId(emailId, request_guid):
     )
     return response['Items']
 
-# TODO.
+
 def retrieve_groups(get_groups_data, request_guid):
     groupIds = get_groups_data["groupIds"]
     logger.info(f"retrieve_groups | RequestId: {request_guid}: retrieving the following group ids {groupIds}")
-    return None
+    response = dynamodb_client.batch_get_item(
+        RequestItems={
+            'Groups': {
+                'Keys': [{'groupId': {'S': group_id}} for group_id in groupIds],
+                'ProjectionExpression': '#groupId, #name, #members, #imageS3Link',
+                'ExpressionAttributeNames': {
+                    "#groupId": "groupId", "#name": "name",
+                    "#members": "members",
+                    "#imageS3Link": "imageS3Link"
+                }
+            }
+        }
+    )
+    groups = response["Responses"]["Groups"]
 
-
-
+    return list(map(lambda group: parse_group_item(group),groups))
