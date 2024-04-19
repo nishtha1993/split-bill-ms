@@ -10,8 +10,8 @@ session = boto3.Session(
 dynamodb = session.resource('dynamodb', region_name='us-east-1')
 lambdaResource = session.client('lambda', region_name='us-east-1')
 s3_client = session.client('s3', region_name='us-east-1')
+dynamodb_client = session.client('dynamodb', region_name='us-east-1')
 textract_client = session.client('textract', region_name='us-east-1')
-
 
 def getDynamoSession():
     return dynamodb
@@ -26,3 +26,6 @@ def getTextractClient():
 
 def getS3Client():
     return s3_client
+
+def getDynamoClient():
+    return dynamodb_client

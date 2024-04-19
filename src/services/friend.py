@@ -1,8 +1,13 @@
+import json
 import logging
-from config import getDynamoSession
+from config import *
 from utils.differentials import get_type, get_type_for_aggregate_differential
+from utils.log import create_random_guid
+from utils.timestamp import get_current_timestamp
 
 differentials_table = getDynamoSession().Table('Differentials')
+ses_lambda_client = getLambdaResource()
+dynamodb_client = getDynamoClient()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -98,3 +103,65 @@ def prepare_friend_history(email1, email2, raw_activity, request_guid):
     friend_history["stats"]["total"]["differential"] = abs(friend_history["stats"]["total"]["differential"])
 
     return friend_history
+
+
+def send_email_using_ses_lambda(sesEmail):
+    '''
+    sesEmail : refer to EmailSchema
+
+    '''
+    # Invoke the SES Lambda function
+    response = ses_lambda_client.invoke(
+        FunctionName='SESSendEmail',
+        InvocationType='Event',  # Use 'Event' for asynchronous invocation
+        Payload=json.dumps(sesEmail)
+    )
+    return response
+
+
+def record_settlement(id1, id2, amount, request_guid):
+    '''
+    1. make an entry into the transaction table to say id1 paid id2
+    2. make the corresponding entry into the differential table and use the id
+    '''
+    timestamp = get_current_timestamp()
+    transactionId = create_random_guid()
+    differentialId = create_random_guid()
+
+    transaction = {
+        "timestamp": {"N": str(timestamp)},
+        "transactionId": {"S": transactionId},
+        "id1": {"S": id1},
+        "id2": {"S": id2},
+        "amount": {"N": str(amount)},
+    }
+
+    differential = {
+        "timestamp": {"N": str(timestamp)},
+        "differentialId": {"S": differentialId},
+        "id1": {"S": id1},
+        "id2": {"S": id2},
+        "differential": {"N": str(amount)},
+    }
+
+    # Start a transaction
+    response = dynamodb_client.transact_write_items(
+        TransactItems=[
+            {
+                'Put': {
+                    'TableName': 'Transactions',
+                    'Item': transaction
+                }
+            },
+            {
+                'Put': {
+                    'TableName': 'Differentials',
+                    'Item': differential
+                }
+            }
+        ])
+    # Transaction succeeded
+    logger.info(
+        f'record_settlement | RequestId: {request_guid} : Successfully saved transaction and differential between {id1} -> {id2} for amount {amount}. Response is {response}'
+    )
+    return response

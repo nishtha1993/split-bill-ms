@@ -2,12 +2,10 @@ from flask import Blueprint, request, jsonify
 import json
 from config import getLambdaResource
 from models.friend import *
-from services.friend import prepare_friend_history, get_differentials_wrt_friend_in_a_group
+from services.friend import *
 from services.group import *
 from utils.log import create_random_guid
 from collections import defaultdict
-
-ses_lambda_client = getLambdaResource()
 
 friend_bp = Blueprint('friend', __name__)
 
@@ -35,7 +33,6 @@ FriendStats:
 ( we can perhaps drop the differentials since there might be many more differentials than transactions )
 
 3. /settle: Record the settlement (but just show something funky in the UI , e.g. google pay after transferring funds) 
-- check validity first of all (A should owe money to B) [UI should have already enforced this!]
 - check the current total differential ( how much does A owe to B)
 - make an entry into the transaction table to say ( A paid B)
 - make a corresponding entry into the differential table as well ( but dont add the expenseId since the absence of that field means that its a settlement! check notion "Objects" for more details)
@@ -158,7 +155,7 @@ def nudge():
 
     try:
         # Validate request data
-        email_params = SESEmailSchema().load(request.json)
+        email_params = NudgeEmailSchema().load(request.json)
         # NOTE: can be html as well
         # Update the email body to include username
         email_params['body'] = email_params['body'] + email_params['user']
@@ -166,14 +163,64 @@ def nudge():
     except ValidationError as err:
         return jsonify({'error': err.messages}), 400
 
-    # Invoke the SES Lambda function
-    response = ses_lambda_client.invoke(
-        FunctionName='SESSendEmail',
-        InvocationType='Event',  # Use 'Event' for asynchronous invocation
-        Payload=json.dumps(email_params)
-    )
+    response = send_email_using_ses_lambda(email_params)
     logger.info(
         f'[POST /friend/nudge] | RequestId: {request_guid} : Response received from lambda invocation {response}'
     )
     # Process the response
     return jsonify({"msg": "nudge remainder sent"})
+
+
+@friend_bp.route('/settle', methods=['POST'])
+def settle():
+    '''
+    - make an entry into the transaction table to say (A paid B)
+    - make a corresponding entry into the differential table as well ( but dont add the expenseId since the absence of that field means that its a settlement! check notion "Objects" for more details)
+    - send user B an email saying user A has settled with you!
+    '''
+    request_guid = create_random_guid()
+    request_object = request.json
+    logger.info(
+        f'[POST /friend/settle] | RequestId: {request_guid} : Entered the endpoint with request_data {request_object}. Now validating input request body'
+    )
+    settlement_schema = SettlementSchema()
+    try:
+        # Validate request body against schema data types
+        request_data = settlement_schema.load(request_object)
+        emailId = request_data["emailId"]
+        recipientEmailId = request_data["recipientEmailId"]
+        amount = request_data["amount"]
+    except ValidationError as err:
+        # Return a nice message if validation fails
+        return jsonify(err.messages), 400
+    except Exception as err:
+        return "Failed to validate settlement schema", 400
+
+    try:
+        response = record_settlement(emailId, recipientEmailId, amount, request_guid)
+    except Exception as err:
+        logger.error(f'[POST /friend/settle] | RequestId: {request_guid}: Error is {err}')
+        return f"Failed to record settlement with err {err}", 500
+
+    # checking successful status
+    if response["ResponseMetadata"]["HTTPStatusCode"] // 100 != 2:
+        return "Failed to record settlement", 500
+
+    try:
+        subject = "[Split-A-Bill]: Someone has settled with you!"
+        body = f"<b>User <i>{emailId}</i> has settled <i>SGD {amount}</i> with you just now :)</b>"
+        sesEmail = {
+            "recipient_email": recipientEmailId,
+            "subject": subject,
+            "body": body
+        }
+        logger.info(
+            f'[POST /friend/settle] | RequestId: {request_guid} : Going to send email to confirm settlement using email {sesEmail}'
+        )
+        emailResponse = send_email_using_ses_lambda(sesEmail)
+        logger.info(
+            f'[POST /friend/settle] | RequestId: {request_guid} : Sent settlement email with response {emailResponse}'
+        )
+        return jsonify({"msg": "Recorded settlement & sent verification email"}), 200
+    except Exception as err:
+        return "Failed to send confirmation email", 500
