@@ -31,3 +31,28 @@ def searchExpenseByGroupId(groupId, request_guid):
         }
     )
     return response['Items']
+
+def get_expenses_count(group_id, request_guid):
+    logger.info(f'get_expenses_count | RequestId: {request_guid} : get expense count for group {groupId}')
+    response = expense_table.query(
+        KeyConditionExpression=Key('groupId').eq(group_id)
+    )
+    return response['Count']
+
+def get_total_spent(group_id, request_guid):
+    logger.info(f'get_total_spent | RequestId: {request_guid} : get expense count for group {groupId}')
+    response = expense_table.query(
+            KeyConditionExpression=Key('groupId').eq(group_id),
+            Select='SUM',
+            ProjectionExpression='baseAmount'
+    )
+    return response['Sum']
+
+def get_my_spent(group_id, email, request_guid):
+    logger.info(f'get_my_spent | RequestId: {request_guid} : get expense count for {email}')
+    response = expense_table.query(
+            KeyConditionExpression=Key('groupId').eq(group_id) & Key('paidBy').eq(email),
+            Select='SUM',
+            ProjectionExpression='baseAmount'
+    )
+    return response['Sum']

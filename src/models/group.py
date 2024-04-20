@@ -7,6 +7,10 @@ class GroupSchema(Schema):
     members = fields.List(fields.Email(), required=True)
     imageS3Link = fields.Str(required=False)
 
+class JoinGroupSchema(Schema):
+    email = fields.Email()
+    group_id = fields.String(required=True)
+    
     @validates('members')
     def validate_length(self, value):
         if len(value) < 1:
@@ -18,3 +22,4 @@ class GetGroupsSchema(Schema):
     def validate_length(self, value):
         if len(value) < 1:
             raise ValidationError('groupIds must be greater than 0.')
+

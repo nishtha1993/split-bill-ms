@@ -2,6 +2,10 @@ from flask import Blueprint
 import logging
 
 from services.friend import send_email_using_ses_lambda
+from services.group import *
+from services.user import *
+from services.expense import * 
+from services.differential import * 
 
 group_bp = Blueprint('group', __name__)
 
@@ -157,6 +161,85 @@ def get_my_groups(emailId):
     logger.info(f'[POST /group/get_my_groups] | RequestId: {request_guid}: Successfully retrieved the groups!')
     return jsonify(response)
 
-@group_bp.route('/leaveGroup', methods=['POST'])
-def leave_group():
-    pass
+@group_bp.route('/joinGroup', methods=['POST'])
+def join_group():
+    '''
+    /joinGroup: To be used when adding a new user to a group for the first time. ( can accept either username or email + group id)
+    - If a user with a user name already exists (and also is a part of the group already!) you can get the user email from the user table and add directly to the Groups table
+    - If not we have to call generateSharableLink and generateTheLink to the sign in page,
+    - (once the user accepts | separate flow) The UI would have to call (/signin) from there the ui can call the same api again with the email id instead.( since the UI would have the signedup user information)
+    - dont forget to add a new row in the interactions table
+    '''
+    request_guid = create_random_guid()
+    logger.info(
+        f'[POST /group/joinGroup/ | RequestId: {request_guid} : Entered the endpoint '
+    )
+
+    try:
+        group_data = request.get_json()
+        join_group_schema = JoinGroupSchema()
+        join_group_data = join_group_schema.load(join_group_data)
+
+        response = retrieve_user_with_id(join_group_data['email'], request_guid) 
+        user_email = response["Item"] 
+        if user_email is not None:
+            add_user_to_group(user_email, join_group_data['group_id'], request_guid)         
+        else:
+            user_created = create_user(join_group_data['email'])
+            add_user_to_group(user_created['email'], join_group_data['group_id'], request_guid)        
+        generate_sharable_link(user_created['email'], join_group_data['group_id'])  
+
+
+        return jsonify({'message': 'User added to group successfully'}), 200
+    except ValidationError as err:
+        return jsonify({'error': err.messages}), 400
+
+    
+    '''
+    Write dynamo queries to get the following data
+
+        GroupStats:
+        - No of expenses (Count from expenses table)
+        - Total money spent so far (sum of baseAmount from expenses table)
+        - How much have I spent in this group (check all the places where 'paidBy' is your email id)
+        - How much am I owed/owe only wrt this group? (Use the differentials table , find all rows where groupId is present and then do sum across id1 -> id2 & id2 -> id1)
+        - No of people in the group (just use groups table)n
+    '''
+@group_bp.route('/getGroupStats', methods=['POST'])
+def get_group_stats():
+    request_guid = create_random_guid()
+    logger.info(
+        f'[POST /group/get_group_stats/ | RequestId: {request_guid} : Entered the endpoint '
+    )
+    try:
+        request_data = request.get_json()
+        group_id = request_data.get('group_id')
+        email = request_data.get('email')
+
+        # No of expenses (Count from expenses table)
+        expenses_count = get_expenses_count(group_id, request_guid)
+
+        # Total money spent so far (sum of baseAmount from expenses table)
+        total_spent = get_total_spent(group_id, request_guid)
+
+        # How much have I spent in this group (check all the places where 'paidBy' is your email id)
+        my_spent = get_my_spent(group_id, email, request_guid)
+
+        # How much am I owed/owe only wrt this group? (Use the differentials table)
+        owed_amount = get_total_owed(group_id, email)
+
+        total_owed = sum(item['amount'] for item in owed_amount if item['id1'] == email)
+
+        # No of people in the group (just use groups table)
+        group_info = get_num_people(group_id, request_guid)
+        num_people = len(group_info['members'])
+
+        return jsonify({
+            'expenses_count': expenses_count,
+            'total_spent': total_spent,
+            'my_spent': my_spent,
+            'total_owed': total_owed,
+            'num_people': num_people
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
