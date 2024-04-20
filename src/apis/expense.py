@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request
 import logging
 import boto3
+from models.expense import *
+from services.expense import *
 
 expense_bp = Blueprint('expense', __name__)
 
@@ -61,28 +63,57 @@ New thoughts:
 3. /modifyExpense
 - check the new expense object and compare with the original expense object and only change the fields
 - if the split needs to be recalculated then we would have to update the differentials and the transactions as well ( maybe this is why it makes sense to store the ids for the differentials and transactions as well for easier writing of the code)
-
-
-
-
-
-
-
 '''
 
-def invoke_lambda(function_name, payload):
-        client = boto3.client('lambda')
-        response = client.invoke(
-            FunctionName=function_name,
-            InvocationType='RequestResponse',  # Change this if needed
-            Payload=payload
-        )
-        return response
+# Assuming equally split among recipients
+def calculate_split(base_amount, num_recipients):
+    return base_amount // num_recipients
+
+@expense_bp.route('/expense', methods=['POST'])
+def addExpense():
+    '''
+    - Assuming that the UI provides the entire expense object as is:
+        * Note that the receipt could have already been uploaded before so the object with the receipt s3 url would already be present
+    - Get the items after going through textract
+    - get the logic for the split 
+    - update the differential tables for each person saying A has paid X amount for B
+    - update the transactions table but only with user id A and groupid + expense Id ( no need to add all members as userid2 since right now they are in debt and only A has actually made a transaction!)
+        * note that the transactionId needs to be saved in the expense table entry as well!
+    - save it in the expenses table
+    - update the interaction table 
+    - check the budget and send email ( if we have the time to implement it)
+    '''
+    request_guid = create_random_guid()
+    request_object = expense_req.json
+    logger.info(
+        f'[POST /user/signin] | RequestId: {request_guid} : Entered the endpoint with request_data {request_object}. Now validating input request body'
+    )
+
+    try:
+        expense_data = request.get_json()
+        expense = ExpenseSchema().load(expense_data)
+
+        # Textract processing
+        items = process_receipt(expense['receipt'])
+        expense['items'] = items
+
+        if expense['splitType'] == 'equally':
+            split_amount = calculate_split(expense['baseAmount'], len(expense['recipients']))
+            for recipient in expense['recipients']:
+                recipient['splitAmount'] = split_amount
+
+        add_differential(expense)
+
+        add_transactions(expense)
+
+        save_expense(expense)
+
+        return jsonify({'message': 'Expense added successfully', 'expense': expense}), 200
+    except ValidationError as err:
+        return jsonify({'error': err.messages}), 400
 
 
-@expense_bp.route('/invoke_lambda', methods=['POST'])
-def invoke_lambda_function():
-    function_name = 'your_lambda_function_name'
-    payload = request.get_json()
-    response = invoke_lambda(function_name, payload)
-    return jsonify(response)
+
+    
+
+
