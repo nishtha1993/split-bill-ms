@@ -1,6 +1,6 @@
 from flask import Blueprint
 import logging
-
+from services.group import *
 search_bp = Blueprint('search', __name__)
 
 logging.basicConfig(level=logging.INFO)
@@ -33,3 +33,29 @@ Later is preferred, because the debugging will be easier with separatability + w
 
 
 '''
+
+@search_bp.route('/search-expense/<expenseName>', methods=['GET'])
+def searchByExpense(expenseName):
+    request_guid = create_random_guid()
+    logger.info(
+        f'[GET /search-expense/<expenseName>] | RequestId: {request_guid} : Search By expense {expenseName}'
+    )
+    try:
+        expenses = searchByExpenseName(expenseName,request_guid)
+        return expenses, 200
+    except ValidationError as err:
+        return jsonify({'error': err.messages}), 400
+
+@search_bp.route('/search-group/<groupName>', methods=['GET'])
+def searchByGroup(groupName):
+    request_guid = create_random_guid()
+    logger.info(
+        f'[GET /search-group/<groupName>] | RequestId: {request_guid} : Search By group {groupName}'
+    )
+    try:
+        groupId = retrieve_groups_by_name(groupName, request_guid)
+        expenses = searchExpenseByGroupId(groupId,request_guid)
+
+        return expenses, 200
+    except ValidationError as err:
+        return jsonify({'error': err.messages}), 400

@@ -28,6 +28,16 @@ def retrieve_groups_for_emailId(emailId, request_guid):
     )
     return response['Items']
 
+def retrieve_groups_by_name(groupName, request_guid):
+    logger.info(f" retrieve_groups_for_emailId | RequestId: {request_guid}: retrieving the group {groupName}")
+    response = groups_table.scan(
+        FilterExpression='contains(name, :groupName)',
+        ExpressionAttributeValues={
+            ':groupName': groupName
+        }
+    )
+    return response['Items']
+
 
 def retrieve_groups(get_groups_data, request_guid):
     groupIds = get_groups_data["groupIds"]
