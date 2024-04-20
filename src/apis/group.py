@@ -243,3 +243,21 @@ def get_group_stats():
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@group_bp.route('/getGroupExpenses', methods=['GET'])
+def get_group_expenses():
+    request_guid = create_random_guid()
+    logger.info(
+        f'[POST /group/get_group_expenses/ | RequestId: {request_guid} : Entered the endpoint '
+    )
+    try:
+        # Retrieve data from the expenses table
+        response = searchExpenseByGroupId(groupId, request_guid)
+        items = response.get('Items', [])
+
+        # Format the data for display in the UI
+        formatted_data = [{'timestamp': item['timestamp'], 'baseAmount': item['baseAmount'], 'paidBy': item['paidBy']} for item in items]
+
+        return jsonify({'expenses': formatted_data}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

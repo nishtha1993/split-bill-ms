@@ -56,3 +56,5 @@ def get_my_spent(group_id, email, request_guid):
             ProjectionExpression='baseAmount'
     )
     return response['Sum']
+    
+
