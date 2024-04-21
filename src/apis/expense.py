@@ -69,7 +69,7 @@ New thoughts:
 def calculate_split(base_amount, num_recipients):
     return base_amount // num_recipients
 
-@expense_bp.route('/expense', methods=['POST'])
+@expense_bp.route('/addExpense', methods=['POST'])
 def addExpense():
     '''
     - Assuming that the UI provides the entire expense object as is:
