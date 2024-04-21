@@ -13,33 +13,33 @@ app.py: Contains the main initialization of the Flask app instance
 config.py: Contains constants and other configuration parameters( e.g. db connection strings etc)
 
 # APIS IMPLEMENTED:
-Expense 
+Expense <br>
 1. /expense/addExpense: To add the expenses
 
-Friend 
+Friend <br>
 2. /friend/getMyFriends
 3. /friend/getMyFriendsHistory
 4. /friend/settle
 5. /friend/nudge
 
-Group
+Group <br>
 6. /group/getMyGroups
 7. /group/createGroup
 8. /group/joinGroup
 9. /group/getGroupStats
 10. /group/getGroupExpenses
 
-ML
+ML <br>
 11. /ml/parseFromTextract
 
-S3
+S3 <br>
 12. /s3/put/<bucket>
 
-Search
+Search <br>
 13. /search/search-expense/<expenseName>
 14. /search/search-group/<groupName>
 
-User
+User <br>
 15. /user/signin
 16. /user/get_user/<email>
 17. /delete/<email>
