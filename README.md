@@ -14,13 +14,13 @@ config.py: Contains constants and other configuration parameters( e.g. db connec
 
 # APIS IMPLEMENTED:
 Expense <br>
-1. /expense/addExpense
+1. /expense/addExpense <br>
 
 Friend <br>
-2. /friend/getMyFriends
-3. /friend/getMyFriendsHistory
-4. /friend/settle
-5. /friend/nudge
+2. /friend/getMyFriends <br>
+3. /friend/getMyFriendsHistory <br>
+4. /friend/settle <br>
+5. /friend/nudge <br>
 
 Group <br>
 6. /group/getMyGroups <br>
