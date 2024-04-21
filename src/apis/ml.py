@@ -50,7 +50,7 @@ def parseFromTextract():
     )
     
     try:
-        key_map, value_map, block_map = get_kv_map("split-bill-receipts", "invoice2.png")
+        key_map, value_map, block_map = get_kv_map("split-bill-receipts", request.json["path"])
 
         # Get Key Value relationship
         kvs = get_kv_relationship(key_map, value_map, block_map)
