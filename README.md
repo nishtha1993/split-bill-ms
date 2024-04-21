@@ -14,7 +14,7 @@ config.py: Contains constants and other configuration parameters( e.g. db connec
 
 # APIS IMPLEMENTED:
 Expense <br>
-1. /expense/addExpense: To add the expenses
+1. /expense/addExpense
 
 Friend <br>
 2. /friend/getMyFriends
@@ -23,26 +23,26 @@ Friend <br>
 5. /friend/nudge
 
 Group <br>
-6. /group/getMyGroups
-7. /group/createGroup
-8. /group/joinGroup
-9. /group/getGroupStats
-10. /group/getGroupExpenses
+6. /group/getMyGroups <br>
+7. /group/createGroup <br>
+8. /group/joinGroup <br>
+9. /group/getGroupStats <br>
+10. /group/getGroupExpenses <br>
 
 ML <br>
-11. /ml/parseFromTextract
+11. /ml/parseFromTextract <br>
 
 S3 <br>
-12. /s3/put/<bucket>
+12. /s3/put/<bucket> <br>
 
 Search <br>
-13. /search/search-expense/<expenseName>
-14. /search/search-group/<groupName>
+13. /search/search-expense/<expenseName> <br>
+14. /search/search-group/<groupName> <br>
 
 User <br>
-15. /user/signin
-16. /user/get_user/<email>
-17. /delete/<email>
+15. /user/signin <br>
+16. /user/get_user/<email> <br>
+17. /delete/<email> <br>
 
 
 # GENERAL CODE GUIDELINES FOLLOWED:
